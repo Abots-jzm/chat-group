@@ -1,8 +1,9 @@
 import { FormEvent, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { paths } from "../App";
 import Layout from "../components/auth/Layout";
 import useLogin from "../hooks/auth/useLogin";
+import useGetUserProfile from "../hooks/profile/useGetUserProfile";
 
 function Login() {
 	const [enteredEmail, setEnteredEmail] = useState("");
@@ -11,10 +12,12 @@ function Login() {
 	const { mutate: login, isLoading, isError } = useLogin();
 	const [errorMessage, setErrorMessage] = useState("");
 
-	const navigate = useNavigate();
 	const location = useLocation();
 	const prevPath = location.state?.from?.pathname;
 	const nextPath = prevPath && prevPath !== paths.LOGIN && prevPath !== paths.SIGNUP ? prevPath : paths.HOME;
+
+	const [logInComplete, setLogInComplete] = useState(false);
+	useGetUserProfile(logInComplete, nextPath);
 
 	function handleSubmit(e: FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -25,7 +28,7 @@ function Login() {
 			},
 			{
 				onSuccess() {
-					navigate(nextPath, { replace: true });
+					setLogInComplete(true);
 				},
 				onError(err: any) {
 					console.log(err.message);

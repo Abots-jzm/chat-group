@@ -29,7 +29,7 @@ function Signup() {
 			},
 			{
 				onSuccess() {
-					navigate(paths.HOME, { replace: true });
+					navigate(paths.PROFILE, { replace: true });
 				},
 				onError(err: any) {
 					if (err?.message === "Firebase: Error (auth/email-already-in-use).") {

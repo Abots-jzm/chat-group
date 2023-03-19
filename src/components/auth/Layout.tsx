@@ -1,12 +1,13 @@
-import React, { ChangeEvent, FormEvent, useState } from "react";
-import styled, { keyframes } from "styled-components";
-import { MdEmail } from "react-icons/md";
-import { IoMdLock } from "react-icons/io";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { paths } from "../../App";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { FaGoogle } from "react-icons/fa";
-import useGuestLogin from "../../hooks/auth/useGuestLogin";
+import { IoMdLock } from "react-icons/io";
+import { MdEmail } from "react-icons/md";
+import { Link, useLocation } from "react-router-dom";
+import styled, { keyframes } from "styled-components";
+import { paths } from "../../App";
 import useGoogleLogin from "../../hooks/auth/useGoogleLogin";
+import useGuestLogin from "../../hooks/auth/useGuestLogin";
+import useGetUserProfile from "../../hooks/profile/useGetUserProfile";
 
 type Props = {
 	enteredEmail: string;
@@ -32,7 +33,6 @@ function Layout({
 	onPasswordChange,
 }: Props) {
 	const location = useLocation();
-	const navigate = useNavigate();
 	const isLoginPage = location.pathname === paths.LOGIN;
 
 	const { mutate: googleLogin, isLoading: googleIsLoading, isError: googleIsError } = useGoogleLogin();
@@ -41,10 +41,13 @@ function Layout({
 	const { mutate: guestLogin, isLoading: guestIsLoading, isError: guestIsError } = useGuestLogin();
 	const [guestErrorMessage, setGuestErrorMessage] = useState("");
 
+	const [logInComplete, setLogInComplete] = useState(false);
+	useGetUserProfile(logInComplete, nextPath);
+
 	async function onGoogleSubmit() {
 		googleLogin(undefined, {
 			onSuccess() {
-				navigate(nextPath || paths.HOME, { replace: true });
+				setLogInComplete(true);
 			},
 			onError() {
 				setGoogleErrorMessage("An unexpected error occured");
@@ -55,7 +58,7 @@ function Layout({
 	async function onGuestSubmit() {
 		guestLogin(undefined, {
 			onSuccess() {
-				navigate(nextPath || paths.HOME, { replace: true });
+				setLogInComplete(true);
 			},
 			onError() {
 				setGuestErrorMessage("An unexpected error occured");
@@ -117,7 +120,7 @@ function Layout({
 						{guestIsLoading && <SpinnerGray />}
 					</OtherBtn>
 					{guestIsError && <ErrorMessage>{guestErrorMessage}</ErrorMessage>}
-					<div style={{ marginTop: isLoginPage ? "3.3rem" : "0" }}>
+					<div className="other-text">
 						{isLoginPage && (
 							<>
 								Don't have an account yet? <LinkStyles to={paths.SIGNUP}>Register</LinkStyles>
@@ -159,6 +162,7 @@ const ErrorMessage = styled.div`
 	font-size: 1.4rem;
 	color: #ff414e;
 	margin-top: 1rem;
+	align-self: flex-start;
 `;
 
 const LinkStyles = styled(Link)`
@@ -173,6 +177,10 @@ const Others = styled.div`
 	align-items: center;
 	color: #828282;
 	font-size: 1.4rem;
+
+	.other-text {
+		margin-top: 3.3rem;
+	}
 `;
 
 const LoginBtn = styled.button`
@@ -252,7 +260,7 @@ const Container = styled.div`
 	& > div {
 		padding: 4.8rem 5.8rem;
 		border-radius: 1.2rem;
-		border: 1px solid white;
+		box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.2);
 		width: min(47.3rem, 100%);
 	}
 
@@ -261,7 +269,7 @@ const Container = styled.div`
 		padding-top: 5vh;
 
 		& > div {
-			border: none;
+			box-shadow: none;
 			padding: 2rem;
 		}
 	}
