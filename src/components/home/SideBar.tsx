@@ -1,26 +1,30 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { paths } from "../../App";
 import useLogout from "../../hooks/auth/useLogout";
-import { IoMdAdd, IoMdClose, IoMdSearch } from "react-icons/io";
+import { IoIosArrowBack, IoMdAdd, IoMdClose, IoMdSearch } from "react-icons/io";
 import { BiChevronDown } from "react-icons/bi";
 import { HiUserCircle } from "react-icons/hi";
 import { TbLogout } from "react-icons/tb";
-import Channel from "./Channel";
+import ListItem from "./ListItem";
 import useGetUserProfile from "../../hooks/profile/useGetUserProfile";
 import { truncateTxt } from "../../util";
+import NewChannelModal from "./NewChannelModal";
 
 type Props = {
 	isOpen: boolean;
+	logoutModalOpen: boolean;
+	setLogoutModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 	closeSideBar: () => void;
 };
 
-function SideBar({ isOpen, closeSideBar }: Props) {
+function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: Props) {
 	const { mutate: logout } = useLogout();
 	const { data } = useGetUserProfile();
 	const navigate = useNavigate();
-	const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+	const [detailsShown, setDetailsShown] = useState(false);
+	const [modalOpen, setModalOpen] = useState(false);
 
 	function toggleLogoutModal(e: React.MouseEvent<HTMLDivElement>) {
 		e.stopPropagation();
@@ -28,30 +32,59 @@ function SideBar({ isOpen, closeSideBar }: Props) {
 	}
 
 	return (
-		<Container isOpen={isOpen} onClick={() => setLogoutModalOpen(false)}>
+		<Container isOpen={isOpen}>
+			{modalOpen && <NewChannelModal closeModal={() => setModalOpen(false)} />}
 			{isOpen && (
 				<Close onClick={closeSideBar}>
 					<IoMdClose />
 				</Close>
 			)}
 			<Top>
-				<div>Channels</div>
-				<div className="icon">
-					<IoMdAdd />
-				</div>
+				{detailsShown && (
+					<div className="back" onClick={() => setDetailsShown(false)}>
+						<IoIosArrowBack />
+					</div>
+				)}
+				<div>{detailsShown ? "All channels" : "Channels"}</div>
+				{!detailsShown && (
+					<div className="icon" onClick={() => setModalOpen(true)}>
+						<IoMdAdd />
+					</div>
+				)}
 			</Top>
 			<Middle>
-				<SearchContainer>
-					<p>
-						<IoMdSearch />
-					</p>
-					<input type="text" placeholder="Search" />
-				</SearchContainer>
-				<Channels>
-					<Channel name="Front-End developers" />
-					<Channel name="cats and dogs" />
-					<Channel name="Random" />
-				</Channels>
+				{!detailsShown && (
+					<>
+						<SearchContainer>
+							<p>
+								<IoMdSearch />
+							</p>
+							<input type="text" placeholder="Search" />
+						</SearchContainer>
+						<Channels>
+							<ListItem name="Front-End developers" onClick={() => setDetailsShown(true)} mode="channel" />
+							<ListItem name="cats and dogs" onClick={() => setDetailsShown(true)} mode="channel" />
+							<ListItem name="Random" onClick={() => setDetailsShown(true)} mode="channel" />
+						</Channels>
+					</>
+				)}
+				{detailsShown && (
+					<>
+						<ChannelDetials>
+							<div className="title">Front-end Developers</div>
+							<div>
+								Lorem ipsum dolor sit amet consectetur adipisicing elit. Id asperiores vero sunt ab consequatur,
+								voluptatum
+							</div>
+							<div className="member">MEMBERS</div>
+							<MembersContainer>
+								<ListItem name="Abots" mode="member" imageURL={data?.photoURL} />
+								<ListItem name="Xanthe Neal" mode="member" imageURL={data?.photoURL} />
+								<ListItem name="Neile Francis" mode="member" imageURL={data?.photoURL} />
+							</MembersContainer>
+						</ChannelDetials>
+					</>
+				)}
 			</Middle>
 			<Bottom>
 				<Photo>
@@ -60,7 +93,7 @@ function SideBar({ isOpen, closeSideBar }: Props) {
 				<DisplayName>{truncateTxt(data?.displayName, 15)}</DisplayName>
 				<Icon onClick={toggleLogoutModal}>
 					<BiChevronDown />
-					<LogoutModal isOpen={logoutModalOpen}>
+					<LogoutModal isOpen={logoutModalOpen} onClick={(e) => e.stopPropagation()}>
 						<div className="profile" onClick={() => navigate(paths.PROFILE)}>
 							<p>
 								<HiUserCircle />
@@ -82,6 +115,29 @@ function SideBar({ isOpen, closeSideBar }: Props) {
 }
 
 export default SideBar;
+
+const MembersContainer = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 3.2rem;
+`;
+
+const ChannelDetials = styled.div`
+	display: flex;
+	flex-direction: column;
+	gap: 1.7rem;
+	font-size: 1.8rem;
+
+	.title {
+		font-weight: 700;
+		text-transform: uppercase;
+	}
+
+	.member {
+		margin-top: 2.6rem;
+		font-weight: 700;
+	}
+`;
 
 interface ILogoutModal {
 	isOpen: boolean;
@@ -241,16 +297,24 @@ const Close = styled.div`
 `;
 
 const Top = styled.div`
-	text-transform: uppercase;
 	font-weight: 700;
 	padding: 1.35rem 2.5rem;
 	box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
 	font-size: 1.8rem;
 	display: flex;
 	align-items: center;
-	justify-content: space-between;
+	gap: 2rem;
+
+	.back {
+		cursor: pointer;
+		font-size: 2.4rem;
+		display: grid;
+		place-items: center;
+		height: 3.2rem;
+	}
 
 	.icon {
+		margin-left: auto;
 		font-size: 2.4rem;
 		display: grid;
 		place-items: center;

@@ -6,10 +6,16 @@ import SideBar from "../components/home/SideBar";
 
 function Home() {
 	const [sideBarisOpen, setSideBarisOpen] = useState(false);
+	const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
 	return (
-		<Container>
-			<SideBar isOpen={sideBarisOpen} closeSideBar={() => setSideBarisOpen(false)} />
+		<Container onClick={() => setLogoutModalOpen(false)}>
+			<SideBar
+				logoutModalOpen={logoutModalOpen}
+				setLogoutModalOpen={setLogoutModalOpen}
+				isOpen={sideBarisOpen}
+				closeSideBar={() => setSideBarisOpen(false)}
+			/>
 			<ChatsContainer>
 				<Top>
 					<div className="menu" onClick={() => setSideBarisOpen(true)}>
