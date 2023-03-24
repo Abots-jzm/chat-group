@@ -345,5 +345,6 @@ const Container = styled.div<IContainer>`
 		height: 100%;
 		transform: translateX(${(props) => (props.isOpen ? "0" : "-100%")});
 		transition: transform 0.5s;
+		z-index: 3;
 	}
 `;

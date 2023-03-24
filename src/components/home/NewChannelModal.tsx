@@ -79,4 +79,5 @@ const Overlay = styled.div`
 	background-color: rgba(18, 15, 19, 0.5);
 	display: grid;
 	place-items: center;
+	z-index: 100;
 `;
