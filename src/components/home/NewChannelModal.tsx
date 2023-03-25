@@ -1,26 +1,47 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import styled from "styled-components";
+import React, { useState } from "react";
+import { createPortal } from "react-dom";
+import styled, { keyframes } from "styled-components";
+import useCreateNewChannel from "../../hooks/chat/useCreateNewChannel";
+import { UserData } from "../../hooks/profile/useGetUserProfile";
 
 const element = document.getElementById("overlay")!;
 
 type Props = {
+	user?: UserData;
 	closeModal: () => void;
 };
 
-function NewChannelModal({ closeModal }: Props) {
+function NewChannelModal({ closeModal, user }: Props) {
+	const [enteredName, setEnteredName] = useState("");
+	const [enteredDescription, setEnteredDescription] = useState("");
+	const { mutate: createNewChannel, isLoading } = useCreateNewChannel();
+
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		closeModal();
+		if (user) createNewChannel({ description: enteredDescription, name: enteredName, user });
 	}
 
-	return ReactDOM.createPortal(
+	return createPortal(
 		<Overlay onClick={closeModal}>
 			<Modal onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>
 				<div className="heading">New channel</div>
-				<input type="text" name="name" placeholder="Channel name" />
-				<textarea name="description" id="description" placeholder="Channel Description" />
-				<button type="submit">Save</button>
+				<input
+					type="text"
+					name="name"
+					placeholder="Channel name"
+					onChange={(e) => setEnteredName(e.target.value)}
+					required
+				/>
+				<textarea
+					name="description"
+					id="description"
+					placeholder="Channel Description"
+					onChange={(e) => setEnteredDescription(e.target.value)}
+					required
+				/>
+				<p>Note: Any channels created will be visible to ALL users</p>
+				<button type="submit">Save {isLoading && <Spinner />}</button>
 			</Modal>
 		</Overlay>,
 		element
@@ -28,6 +49,20 @@ function NewChannelModal({ closeModal }: Props) {
 }
 
 export default NewChannelModal;
+
+const spinner = keyframes`
+   100% {
+    transform: rotate(360deg);
+  }
+`;
+
+const Spinner = styled.div`
+	width: 2rem;
+	height: 2rem;
+	border-radius: 50%;
+	border-left: 2px solid white;
+	animation: ${spinner} 0.7s linear infinite;
+`;
 
 const Modal = styled.form`
 	color: #f2f2f2;
@@ -45,6 +80,8 @@ const Modal = styled.form`
 		border-radius: 8px;
 		align-self: flex-end;
 		color: #f2f2f2;
+		display: flex;
+		gap: 1rem;
 	}
 
 	input,
@@ -55,10 +92,16 @@ const Modal = styled.form`
 		color: #bdbdbd;
 		width: 100%;
 		background-color: #3c393f;
+		resize: none;
 
 		&::placeholder {
 			color: #828282;
 		}
+	}
+
+	p {
+		color: #828282;
+		font-size: 1.4rem;
 	}
 
 	textarea {

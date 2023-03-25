@@ -1,8 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { db } from "../../api/firebase";
-import { arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, updateDoc } from "firebase/firestore";
 import { UserData } from "../profile/useGetUserProfile";
-import { Channel } from "../../components/home/SideBar";
 
 type Payload = {
 	user: UserData;

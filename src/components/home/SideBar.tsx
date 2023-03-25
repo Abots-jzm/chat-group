@@ -32,15 +32,17 @@ type Props = {
 function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: Props) {
 	const { mutate: logout } = useLogout();
 	const { data: userData } = useGetUserProfile();
+	const { mutate: joinGroup } = useJoinGroup();
+
 	const navigate = useNavigate();
+	const { channelId } = useParams();
+
 	const [detailsShown, setDetailsShown] = useState(false);
 	const [modalOpen, setModalOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [data, setData] = useState<Channel[]>();
 	const [members, setMembers] = useState<any>();
 	const [activeChannel, setActiveChannel] = useState<Channel>();
-	const { mutate: joinGroup } = useJoinGroup();
-	const { channelId } = useParams();
 
 	useEffect(() => {
 		setIsLoading(true);
@@ -65,6 +67,7 @@ function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: 
 	}
 
 	function onChannelClicked(channel: Channel) {
+		navigate("/" + channel.id);
 		setActiveChannel(channel);
 		setDetailsShown(true);
 		if (channelId && userData) joinGroup({ channelId, user: userData });
@@ -79,7 +82,7 @@ function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: 
 
 	return (
 		<Container isOpen={isOpen}>
-			{modalOpen && <NewChannelModal closeModal={() => setModalOpen(false)} />}
+			{modalOpen && <NewChannelModal user={userData} closeModal={() => setModalOpen(false)} />}
 			{isOpen && (
 				<Close onClick={closeSideBar}>
 					<IoMdClose />
