@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { truncateTxt } from "../../util";
+import BlankPicture from "../../assets/blank-profile-picture.png";
 
 type Props = {
 	name: string;
@@ -21,7 +22,7 @@ function ListItem({ name, onClick, mode, imageURL }: Props) {
 		<Container onClick={onClick}>
 			<Icon>
 				{mode === "channel" && getIcon()}
-				{mode === "member" && <img src={imageURL} alt={name} />}
+				{mode === "member" && <img src={imageURL || BlankPicture} alt={name} />}
 			</Icon>
 			<Name mode={mode}>{truncateTxt(name, 15)}</Name>
 		</Container>

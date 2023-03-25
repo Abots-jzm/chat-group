@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { paths } from "../App";
 import Layout from "../components/auth/Layout";
 import useSignup from "../hooks/auth/useSignup";
+import useJoinGroup from "../hooks/chat/useJoinGroup";
 
 function Signup() {
 	const [enteredEmail, setEnteredEmail] = useState("");

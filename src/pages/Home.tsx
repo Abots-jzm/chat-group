@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Div100vh from "react-div-100vh";
 import { IoMdMenu } from "react-icons/io";
 import styled from "styled-components";
 import SideBar from "../components/home/SideBar";
 import { IoMdSend } from "react-icons/io";
 import ChatItem from "../components/home/ChatItem";
+import DateDivider from "../components/home/DateDivider";
+import { useParams } from "react-router-dom";
+import useJoinGroup from "../hooks/chat/useJoinGroup";
 
 function Home() {
 	const [sideBarisOpen, setSideBarisOpen] = useState(false);
 	const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+	const { channelId } = useParams();
 
 	function sendMessage(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -30,10 +34,16 @@ function Home() {
 					<div>front-end developers</div>
 				</Top>
 				<Middle>
-					<ChatItem />
-					<ChatItem />
-					<ChatItem />
-					<ChatItem />
+					<DateDivider>August 3, 2020</DateDivider>
+					<ChatItem
+						image={"https://wallpapers.com/images/hd/cool-profile-picture-ld8f4n1qemczkrig.jpg"}
+						name={"Neille Francis"}
+						time={"yesterday at 2:29 AM"}
+					>
+						Lorem ipsum dolor sit amet consectetur, adipisicing elit. Mollitia, sed porro. Possimus eum illo eligendi
+						aliquam quia accusamus debitis harum temporibus vel dolore, cum maxime in dolores? Suscipit, dolore
+						voluptatum.
+					</ChatItem>
 				</Middle>
 				<Bottom onSubmit={sendMessage}>
 					<input type="text" placeholder="Type a message here" />

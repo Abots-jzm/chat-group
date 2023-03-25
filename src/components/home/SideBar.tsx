@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import styled, { keyframes } from "styled-components";
 import { paths } from "../../App";
 import useLogout from "../../hooks/auth/useLogout";
 import { IoIosArrowBack, IoMdAdd, IoMdClose, IoMdSearch } from "react-icons/io";
@@ -8,9 +8,19 @@ import { BiChevronDown } from "react-icons/bi";
 import { HiUserCircle } from "react-icons/hi";
 import { TbLogout } from "react-icons/tb";
 import ListItem from "./ListItem";
-import useGetUserProfile from "../../hooks/profile/useGetUserProfile";
+import useGetUserProfile, { UserData } from "../../hooks/profile/useGetUserProfile";
 import { truncateTxt } from "../../util";
 import NewChannelModal from "./NewChannelModal";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../../api/firebase";
+import useJoinGroup from "../../hooks/chat/useJoinGroup";
+import BlankPicture from "../../assets/blank-profile-picture.png";
+
+export type Channel = {
+	description: string;
+	id: string;
+	name: string;
+};
 
 type Props = {
 	isOpen: boolean;
@@ -21,15 +31,51 @@ type Props = {
 
 function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: Props) {
 	const { mutate: logout } = useLogout();
-	const { data } = useGetUserProfile();
+	const { data: userData } = useGetUserProfile();
 	const navigate = useNavigate();
 	const [detailsShown, setDetailsShown] = useState(false);
 	const [modalOpen, setModalOpen] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
+	const [data, setData] = useState<Channel[]>();
+	const [members, setMembers] = useState<any>();
+	const [activeChannel, setActiveChannel] = useState<Channel>();
+	const { mutate: joinGroup } = useJoinGroup();
+	const { channelId } = useParams();
+
+	useEffect(() => {
+		setIsLoading(true);
+		const unsubscribe1 = onSnapshot(doc(db, "default/info"), (doc) => {
+			setData(doc.data()?.channels as Channel[]);
+			setIsLoading(false);
+		});
+
+		const unsubscribe2 = onSnapshot(doc(db, "default/members"), (doc) => {
+			setMembers(doc.data());
+		});
+
+		return () => {
+			unsubscribe1();
+			unsubscribe2();
+		};
+	}, []);
 
 	function toggleLogoutModal(e: React.MouseEvent<HTMLDivElement>) {
 		e.stopPropagation();
 		setLogoutModalOpen((prev) => !prev);
 	}
+
+	function onChannelClicked(channel: Channel) {
+		setActiveChannel(channel);
+		setDetailsShown(true);
+		if (channelId && userData) joinGroup({ channelId, user: userData });
+	}
+
+	if (isLoading)
+		return (
+			<LoadingContainer isOpen={isOpen}>
+				<Spinner />
+			</LoadingContainer>
+		);
 
 	return (
 		<Container isOpen={isOpen}>
@@ -62,25 +108,27 @@ function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: 
 							<input type="text" placeholder="Search" />
 						</SearchContainer>
 						<Channels>
-							<ListItem name="Front-End developers" onClick={() => setDetailsShown(true)} mode="channel" />
-							<ListItem name="cats and dogs" onClick={() => setDetailsShown(true)} mode="channel" />
-							<ListItem name="Random" onClick={() => setDetailsShown(true)} mode="channel" />
+							{data?.map((channel) => (
+								<ListItem
+									name={channel.name}
+									mode="channel"
+									onClick={() => onChannelClicked(channel)}
+									key={channel.id}
+								/>
+							))}
 						</Channels>
 					</>
 				)}
 				{detailsShown && (
 					<>
 						<ChannelDetials>
-							<div className="title">Front-end Developers</div>
-							<div>
-								Lorem ipsum dolor sit amet consectetur adipisicing elit. Id asperiores vero sunt ab consequatur,
-								voluptatum
-							</div>
+							<div className="title">{activeChannel?.name}</div>
+							<div>{activeChannel?.description}</div>
 							<div className="member">MEMBERS</div>
 							<MembersContainer>
-								<ListItem name="Abots" mode="member" imageURL={data?.photoURL} />
-								<ListItem name="Xanthe Neal" mode="member" imageURL={data?.photoURL} />
-								<ListItem name="Neile Francis" mode="member" imageURL={data?.photoURL} />
+								{members[channelId!].map((member: UserData, i: number) => (
+									<ListItem name={member.displayName} mode="member" imageURL={member.photoURL} key={i} />
+								))}
 							</MembersContainer>
 						</ChannelDetials>
 					</>
@@ -88,9 +136,9 @@ function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: 
 			</Middle>
 			<Bottom>
 				<Photo>
-					<img src={data?.photoURL} alt="profile pic" />
+					<img src={userData?.photoURL || BlankPicture} alt="profile pic" />
 				</Photo>
-				<DisplayName>{truncateTxt(data?.displayName, 15)}</DisplayName>
+				<DisplayName>{truncateTxt(userData?.displayName || "", 15)}</DisplayName>
 				<Icon onClick={toggleLogoutModal}>
 					<BiChevronDown />
 					<LogoutModal isOpen={logoutModalOpen} onClick={(e) => e.stopPropagation()}>
@@ -115,6 +163,20 @@ function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: 
 }
 
 export default SideBar;
+
+const spinner = keyframes`
+   100% {
+    transform: rotate(360deg);
+  }
+`;
+
+const Spinner = styled.div`
+	width: 5rem;
+	height: 5rem;
+	border-radius: 50%;
+	border-left: 2px solid white;
+	animation: ${spinner} 1s linear infinite;
+`;
 
 const MembersContainer = styled.div`
 	display: flex;
@@ -347,4 +409,9 @@ const Container = styled.div<IContainer>`
 		transition: transform 0.5s;
 		z-index: 3;
 	}
+`;
+
+const LoadingContainer = styled(Container)`
+	display: grid;
+	place-items: center;
 `;

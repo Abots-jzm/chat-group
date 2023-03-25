@@ -14,7 +14,7 @@ function Login() {
 
 	const location = useLocation();
 	const prevPath = location.state?.from?.pathname;
-	const nextPath = prevPath && prevPath !== paths.LOGIN && prevPath !== paths.SIGNUP ? prevPath : paths.HOME;
+	const nextPath = prevPath && prevPath !== paths.LOGIN && prevPath !== paths.SIGNUP ? prevPath : paths.WELCOME;
 
 	const [logInComplete, setLogInComplete] = useState(false);
 	useGetUserProfile(logInComplete, nextPath);

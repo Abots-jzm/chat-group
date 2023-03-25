@@ -1,20 +1,23 @@
 import React from "react";
 import styled from "styled-components";
 
-function ChatItem() {
+type Props = {
+	image: string;
+	name: string;
+	time: string;
+	children: React.ReactNode;
+};
+
+function ChatItem({ image, name, time, children }: Props) {
 	return (
 		<Container>
 			<Photo>
-				<img src={"https://wallpapers.com/images/hd/cool-profile-picture-ld8f4n1qemczkrig.jpg"} alt="avatar" />
+				<img src={image} alt="avatar" />
 			</Photo>
 			<Right>
-				<div className="name">Neille Francis</div>
-				<div className="time">yesterday at 2:29 AM</div>
-				<div className="message">
-					Lorem ipsum dolor sit amet consectetur, adipisicing elit. Mollitia, sed porro. Possimus eum illo eligendi
-					aliquam quia accusamus debitis harum temporibus vel dolore, cum maxime in dolores? Suscipit, dolore
-					voluptatum.
-				</div>
+				<div className="name">{name}</div>
+				<div className="time">{time}</div>
+				<div className="message">{children}</div>
 			</Right>
 		</Container>
 	);

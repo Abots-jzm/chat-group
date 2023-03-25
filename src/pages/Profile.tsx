@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled, { keyframes } from "styled-components";
 import { paths } from "../App";
 import BlanckPicture from "../assets/blank-profile-picture.png";
@@ -28,7 +28,7 @@ function Profile() {
 
 	function getPhotoSrc(): string {
 		if (currentPhoto) return URL.createObjectURL(currentPhoto);
-		if (data) return data.photoURL;
+		if (data) return data.photoURL || BlanckPicture;
 		else return BlanckPicture;
 	}
 
@@ -41,10 +41,10 @@ function Profile() {
 		}
 
 		updateProfile(
-			{ photo: currentPhoto, dispayName: enteredName, uid },
+			{ photo: currentPhoto, dispayName: enteredName, uid, firstTime: !data },
 			{
 				onSuccess() {
-					if (!data) navigate(paths.HOME, { replace: true });
+					if (!data) navigate(paths.WELCOME, { replace: true });
 					else setIsEditing(false);
 				},
 			}
@@ -55,14 +55,14 @@ function Profile() {
 		<Container backIsShown={!!data}>
 			<div>
 				{data && (
-					<Back to={paths.HOME}>
+					<Back onClick={() => navigate(-1)}>
 						<IoIosArrowBack /> Back
 					</Back>
 				)}
 				<Heading>Profile {!isEditing && <div onClick={() => setIsEditing(true)}>Edit</div>}</Heading>
 				<Picture>
 					<div>
-						<img src={getPhotoSrc()} alt="blank picture" />
+						<img src={getPhotoSrc()} alt="picture" />
 					</div>
 					{isEditing && (
 						<>
@@ -114,7 +114,7 @@ const Spinner = styled.div`
 	animation: ${spinner} 0.7s linear infinite;
 `;
 
-const Back = styled(Link)`
+const Back = styled.div`
 	color: #2d9cdb;
 	font-size: 1.8rem;
 	display: flex;
