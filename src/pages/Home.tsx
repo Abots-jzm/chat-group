@@ -11,6 +11,8 @@ import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "../api/firebase";
 import useSendChat, { SendChatPayload } from "../hooks/chat/useSendChat";
 import useGetUserProfile from "../hooks/profile/useGetUserProfile";
+import useAssistant from "../hooks/chat/useAssistant";
+import GPTLogo from "../assets/ChatGPT_Logo_PNG1.png";
 
 const MONTH_NAMES = [
 	"January",
@@ -41,11 +43,14 @@ function Home() {
 	const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [messages, setMessages] = useState<Message[]>();
+	const [assistantMessages, setAssistantMessages] = useState<Message[]>([]);
+	const [isAssistantChannel, setIsAssistantChannel] = useState(false);
 	const [enteredMessage, setEnteredMessage] = useState("");
 	const [activeChannel, setActiveChannel] = useState<Channel>();
 
 	const { mutate: sendChat } = useSendChat();
 	const { data: userData } = useGetUserProfile();
+	const { mutate: askAssistant } = useAssistant();
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -56,6 +61,12 @@ function Home() {
 	useEffect(() => {
 		if (!channelId) return;
 
+		if (channelId === "assistant") {
+			setIsAssistantChannel(true);
+			return;
+		}
+
+		setIsAssistantChannel(false);
 		setIsLoading(true);
 		const unsubscribe = onSnapshot(doc(db, "chat/" + channelId), (doc) => {
 			setMessages(doc.data()?.messages as Message[]);
@@ -70,6 +81,38 @@ function Home() {
 	function sendMessage(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
 		if (!channelId || !userData) return;
+
+		if (isAssistantChannel) {
+			const newUserMessage: Message = {
+				displayName: userData.displayName,
+				message: enteredMessage,
+				time: Timestamp.fromDate(new Date()),
+			};
+			if (userData.photoURL) newUserMessage.photoURL = userData.photoURL;
+			setAssistantMessages((prev) => [...prev, newUserMessage]);
+			askAssistant(enteredMessage, {
+				onSuccess(data) {
+					const newAssistantMessage: Message = {
+						displayName: "AI Assistant",
+						time: Timestamp.fromDate(new Date()),
+						message: data.data.choices[0].message?.content || "An error occurred",
+						photoURL: GPTLogo,
+					};
+					setAssistantMessages((prev) => [...prev, newAssistantMessage]);
+				},
+				onError() {
+					const newAssistantMessage: Message = {
+						displayName: "AI Assistant",
+						time: Timestamp.fromDate(new Date()),
+						message: "An error occurred",
+						photoURL: GPTLogo,
+					};
+					setAssistantMessages((prev) => [...prev, newAssistantMessage]);
+				},
+			});
+			setEnteredMessage("");
+			return;
+		}
 
 		const payload: SendChatPayload = {
 			channelId,
@@ -125,12 +168,21 @@ function Home() {
 					</div>
 					<div>{activeChannel?.name || "Welcome"}</div>
 				</Top>
-				{isLoading && (
+				{isAssistantChannel && (
+					<Middle ref={ref}>
+						{assistantMessages.map((message, i) => (
+							<ChatItem name={message.displayName} time={message.time} image={message.photoURL} key={i}>
+								{message.message}
+							</ChatItem>
+						))}
+					</Middle>
+				)}
+				{isLoading && !isAssistantChannel && (
 					<LoadingContainer>
 						<Spinner />
 					</LoadingContainer>
 				)}
-				{!isLoading && <Middle ref={ref}>{getChatContent()}</Middle>}
+				{!isLoading && !isAssistantChannel && <Middle ref={ref}>{getChatContent()}</Middle>}
 				<Bottom onSubmit={sendMessage}>
 					<input
 						type="text"

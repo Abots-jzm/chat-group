@@ -15,11 +15,18 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../../api/firebase";
 import useJoinGroup from "../../hooks/chat/useJoinGroup";
 import BlankPicture from "../../assets/blank-profile-picture.png";
+import GPTLogo from "../../assets/ChatGPT_Logo_PNG1.png";
 
 export type Channel = {
 	description: string;
 	id: string;
 	name: string;
+};
+
+const AssistantChannel: Channel = {
+	name: "AI Assistant",
+	description: "This is your personal AI Assistant. Only you has access to the chats here",
+	id: "assitant",
 };
 
 type Props = {
@@ -82,6 +89,12 @@ function SideBar({
 		if (channelId && userData) joinGroup({ channelId, user: userData });
 	}
 
+	function onAssistantChannelClicked() {
+		navigate("/assistant");
+		setActiveChannel(AssistantChannel);
+		closeSideBar();
+	}
+
 	if (isLoading)
 		return (
 			<LoadingContainer isOpen={isOpen}>
@@ -120,6 +133,7 @@ function SideBar({
 							<input type="text" placeholder="Search" />
 						</SearchContainer>
 						<Channels>
+							<ListItem name="AI Assistant" mode="member" onClick={onAssistantChannelClicked} imageURL={GPTLogo} />
 							{data?.map((channel) => (
 								<ListItem
 									name={channel.name}
