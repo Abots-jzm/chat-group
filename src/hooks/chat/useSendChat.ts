@@ -1,12 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { db } from "../../api/firebase";
 import { arrayUnion, doc, updateDoc } from "firebase/firestore";
-import { Message } from "../../pages/Home";
-
-export type SendChatPayload = {
-	channelId: string;
-	message: Message;
-};
+import { SendChatPayload } from "./types";
 
 async function sendChant(payload: SendChatPayload) {
 	return await updateDoc(doc(db, "chat/" + payload.channelId), {

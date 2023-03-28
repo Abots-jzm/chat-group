@@ -1,17 +1,10 @@
-import { UserData } from "./useGetUserProfile";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { db, storage } from "../../api/firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
+import { UpdateProfilePayload, UserData } from "./types";
 
-type Payload = {
-	photo?: File;
-	dispayName: string;
-	uid: string;
-	firstTime: boolean;
-};
-
-async function updateProfile(payload: Payload) {
+async function updateProfile(payload: UpdateProfilePayload) {
 	let url;
 	if (payload.photo) {
 		const imagesRef = ref(storage, payload.uid);

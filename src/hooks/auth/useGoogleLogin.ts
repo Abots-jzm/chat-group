@@ -1,13 +1,12 @@
 import { useAppDispatch } from "./../../store/hooks";
-import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { signInWithPopup } from "firebase/auth";
 import { useMutation } from "@tanstack/react-query";
 import { auth } from "../../api/firebase";
 import { authActions } from "../../store/slices/authSlice";
-
-const provider = new GoogleAuthProvider();
+import { googleAuthProvider } from "./types";
 
 async function googleLogin() {
-	return await signInWithPopup(auth, provider);
+	return await signInWithPopup(auth, googleAuthProvider);
 }
 
 function useGoogleLogin() {

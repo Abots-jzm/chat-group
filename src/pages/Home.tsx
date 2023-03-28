@@ -2,39 +2,20 @@ import React, { useEffect, useRef, useState } from "react";
 import Div100vh from "react-div-100vh";
 import { IoMdMenu } from "react-icons/io";
 import styled, { keyframes } from "styled-components";
-import SideBar, { Channel } from "../components/home/SideBar";
+import SideBar from "../components/home/SideBar";
 import { IoMdSend } from "react-icons/io";
 import ChatItem from "../components/home/ChatItem";
 import DateDivider from "../components/home/DateDivider";
 import { useParams } from "react-router-dom";
 import { doc, onSnapshot, Timestamp } from "firebase/firestore";
 import { db } from "../api/firebase";
-import useSendChat, { SendChatPayload } from "../hooks/chat/useSendChat";
+import useSendChat from "../hooks/chat/useSendChat";
 import useGetUserProfile from "../hooks/profile/useGetUserProfile";
 import useAssistant from "../hooks/chat/useAssistant";
 import GPTLogo from "../assets/ChatGPT_Logo_PNG1.png";
-
-const MONTH_NAMES = [
-	"January",
-	"February",
-	"March",
-	"April",
-	"May",
-	"June",
-	"July",
-	"August",
-	"September",
-	"October",
-	"November",
-	"December",
-];
-
-export type Message = {
-	displayName: string;
-	time: Timestamp;
-	message: string;
-	photoURL?: string;
-};
+import { Channel } from "../components/home/types";
+import { SendChatPayload } from "../hooks/chat/types";
+import { Message, MONTH_NAMES } from "./types";
 
 function Home() {
 	const { channelId } = useParams();

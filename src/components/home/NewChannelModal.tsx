@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import styled, { keyframes } from "styled-components";
 import useCreateNewChannel from "../../hooks/chat/useCreateNewChannel";
-import { UserData } from "../../hooks/profile/useGetUserProfile";
+import { UserData } from "../../hooks/profile/types";
 
 const element = document.getElementById("overlay")!;
 

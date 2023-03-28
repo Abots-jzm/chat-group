@@ -1,15 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 import { db } from "../../api/firebase";
 import { arrayUnion, doc, setDoc, updateDoc } from "firebase/firestore";
-import { UserData } from "../profile/useGetUserProfile";
+import { CreateChannelPayload } from "./types";
 
-type Payload = {
-	name: string;
-	description: string;
-	user: UserData;
-};
-
-async function createChannel(payload: Payload) {
+async function createChannel(payload: CreateChannelPayload) {
 	const id = Date.now().toString(36) + Math.random().toString(36).substring(2);
 
 	const membersPromise = updateDoc(doc(db, "default/members"), {

@@ -3,11 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../api/firebase";
 import { authActions } from "../../store/slices/authSlice";
-
-type EmailAndPassword = {
-	email: string;
-	password: string;
-};
+import { EmailAndPassword } from "./types";
 
 async function login(payload: EmailAndPassword) {
 	return await signInWithEmailAndPassword(auth, payload.email, payload.password);

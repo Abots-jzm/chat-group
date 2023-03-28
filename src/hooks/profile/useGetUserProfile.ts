@@ -4,11 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { db } from "../../api/firebase";
 import { paths } from "../../App";
 import { useAppSelector } from "../../store/hooks";
-
-export type UserData = {
-	displayName: string;
-	photoURL?: string;
-};
+import { UserData } from "./types";
 
 async function getUserProfile(userId: string) {
 	return await getDoc(doc(db, "users/" + userId));
