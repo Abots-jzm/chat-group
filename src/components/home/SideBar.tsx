@@ -26,10 +26,19 @@ type Props = {
 	isOpen: boolean;
 	logoutModalOpen: boolean;
 	setLogoutModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+	activeChannel?: Channel;
+	setActiveChannel: React.Dispatch<React.SetStateAction<Channel | undefined>>;
 	closeSideBar: () => void;
 };
 
-function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: Props) {
+function SideBar({
+	isOpen,
+	closeSideBar,
+	logoutModalOpen,
+	setLogoutModalOpen,
+	activeChannel,
+	setActiveChannel,
+}: Props) {
 	const { mutate: logout } = useLogout();
 	const { data: userData } = useGetUserProfile();
 	const { mutate: joinGroup } = useJoinGroup();
@@ -42,7 +51,6 @@ function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: 
 	const [isLoading, setIsLoading] = useState(false);
 	const [data, setData] = useState<Channel[]>();
 	const [members, setMembers] = useState<any>();
-	const [activeChannel, setActiveChannel] = useState<Channel>();
 
 	useEffect(() => {
 		setIsLoading(true);
@@ -70,6 +78,7 @@ function SideBar({ isOpen, closeSideBar, logoutModalOpen, setLogoutModalOpen }: 
 		navigate("/" + channel.id);
 		setActiveChannel(channel);
 		setDetailsShown(true);
+		closeSideBar();
 		if (channelId && userData) joinGroup({ channelId, user: userData });
 	}
 
@@ -339,6 +348,22 @@ const SearchContainer = styled.div`
 const Middle = styled.div`
 	padding: 2rem 2.5rem;
 	margin-bottom: auto;
+	overflow-y: auto;
+
+	&::-webkit-scrollbar {
+		width: 5px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background-color: rgba(0, 0, 0, 0.1);
+		border-radius: 100rem;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		height: 1rem;
+		background: rgba(255, 255, 255, 0.6);
+		border-radius: 100rem;
+	}
 `;
 
 const Close = styled.div`

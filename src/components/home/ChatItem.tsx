@@ -1,22 +1,55 @@
+import { Timestamp } from "firebase/firestore";
 import React from "react";
 import styled from "styled-components";
+import BlankPicture from "../../assets/blank-profile-picture.png";
 
 type Props = {
-	image: string;
+	image?: string;
 	name: string;
-	time: string;
+	time: Timestamp;
 	children: React.ReactNode;
 };
 
 function ChatItem({ image, name, time, children }: Props) {
+	function formatDate(timestamp: Timestamp): string {
+		const date = new Date(timestamp.toDate());
+		const now = new Date();
+		const diff = now.getTime() - date.getTime();
+		const seconds = Math.floor(diff / 1000);
+
+		if (seconds < 60) {
+			return "Just now";
+		} else if (seconds < 60 * 60) {
+			const minutes = Math.floor(seconds / 60);
+			return `${minutes} minute${minutes > 1 ? "s" : ""} ago`;
+		} else if (seconds < 60 * 60 * 24) {
+			const hours = Math.floor(seconds / (60 * 60));
+			return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+		} else if (date.getFullYear() === now.getFullYear()) {
+			const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
+			const day = date.toLocaleDateString(undefined, options);
+			const time = date.toLocaleTimeString([], { hour: "numeric", minute: "numeric" });
+			if (seconds < 60 * 60 * 24 * 2) {
+				return `Yesterday at ${time}`;
+			} else {
+				return `${day} at ${time}`;
+			}
+		} else {
+			const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" };
+			const day = date.toLocaleDateString(undefined, options);
+			const time = date.toLocaleTimeString([], { hour: "numeric", minute: "numeric" });
+			return `${day} at ${time}`;
+		}
+	}
+
 	return (
 		<Container>
 			<Photo>
-				<img src={image} alt="avatar" />
+				<img src={image || BlankPicture} alt="avatar" />
 			</Photo>
 			<Right>
 				<div className="name">{name}</div>
-				<div className="time">{time}</div>
+				<div className="time">{formatDate(time)}</div>
 				<div className="message">{children}</div>
 			</Right>
 		</Container>
