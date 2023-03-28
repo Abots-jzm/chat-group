@@ -31,7 +31,7 @@ function Home() {
 
 	const { mutate: sendChat } = useSendChat();
 	const { data: userData } = useGetUserProfile();
-	const { mutate: askAssistant } = useAssistant();
+	const { mutate: askAssistant, isLoading: AILoading } = useAssistant();
 
 	const ref = useRef<HTMLDivElement>(null);
 
@@ -156,6 +156,15 @@ function Home() {
 								{message.message}
 							</ChatItem>
 						))}
+						{AILoading && (
+							<ChatItem name="AI Assistant" image={GPTLogo} time={Timestamp.fromDate(new Date())}>
+								<AILoadingSpinner>
+									<div className="inner one" />
+									<div className="inner two" />
+									<div className="inner three" />
+								</AILoadingSpinner>
+							</ChatItem>
+						)}
 					</Middle>
 				)}
 				{isLoading && !isAssistantChannel && (
@@ -181,6 +190,68 @@ function Home() {
 }
 
 export default Home;
+
+const rotateOne = keyframes`
+  0% {
+    transform: rotateX(35deg) rotateY(-45deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(35deg) rotateY(-45deg) rotateZ(360deg);
+}`;
+
+const rotateTwo = keyframes`
+  0% {
+    transform: rotateX(50deg) rotateY(10deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(50deg) rotateY(10deg) rotateZ(360deg);
+  }
+`;
+
+const rotateThree = keyframes`
+  0% {
+    transform: rotateX(35deg) rotateY(55deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(35deg) rotateY(55deg) rotateZ(360deg);
+  }
+`;
+
+const AILoadingSpinner = styled.div`
+	width: 48px;
+	height: 48px;
+	border-radius: 50%;
+	perspective: 800px;
+
+	.inner {
+		position: absolute;
+		box-sizing: border-box;
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+	}
+
+	.inner.one {
+		left: 0%;
+		top: 0%;
+		animation: ${rotateOne} 1s linear infinite;
+		border-bottom: 3px solid #efeffa;
+	}
+
+	.inner.two {
+		right: 0%;
+		top: 0%;
+		animation: ${rotateTwo} 1s linear infinite;
+		border-right: 3px solid #efeffa;
+	}
+
+	.inner.three {
+		right: 0%;
+		bottom: 0%;
+		animation: ${rotateThree} 1s linear infinite;
+		border-top: 3px solid #efeffa;
+	}
+`;
 
 const spinner = keyframes`
    100% {
