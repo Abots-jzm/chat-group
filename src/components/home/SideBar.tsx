@@ -48,6 +48,7 @@ function SideBar({
 	const [isLoading, setIsLoading] = useState(false);
 	const [data, setData] = useState<Channel[]>();
 	const [members, setMembers] = useState<any>();
+	const [searchFilter, setSearchFilter] = useState("");
 
 	useEffect(() => {
 		setIsLoading(true);
@@ -120,18 +121,20 @@ function SideBar({
 							<p>
 								<IoMdSearch />
 							</p>
-							<input type="text" placeholder="Search" />
+							<input type="text" placeholder="Search" onChange={(e) => setSearchFilter(e.target.value)} />
 						</SearchContainer>
 						<Channels>
 							<ListItem name="AI Assistant" mode="member" onClick={onAssistantChannelClicked} imageURL={GPTLogo} />
-							{data?.map((channel) => (
-								<ListItem
-									name={channel.name}
-									mode="channel"
-									onClick={() => onChannelClicked(channel)}
-									key={channel.id}
-								/>
-							))}
+							{data
+								?.filter((channel) => channel.name.toLowerCase().trim().includes(searchFilter.toLowerCase().trim()))
+								.map((channel) => (
+									<ListItem
+										name={channel.name}
+										mode="channel"
+										onClick={() => onChannelClicked(channel)}
+										key={channel.id}
+									/>
+								))}
 						</Channels>
 					</>
 				)}

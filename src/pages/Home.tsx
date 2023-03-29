@@ -179,6 +179,7 @@ function Home() {
 						placeholder="Type a message here"
 						onChange={(e) => setEnteredMessage(e.target.value)}
 						value={enteredMessage}
+						required
 					/>
 					<button type="submit">
 						<IoMdSend />
